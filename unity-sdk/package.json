@@ -1,0 +1,40 @@
+{
+  "name": "com.adaptrehab.sdk",
+  "version": "0.1.0",
+  "displayName": "Adaptive Rehab AI SDK",
+  "description": "Unity SDK for integrating AI-driven adaptive difficulty in VR rehabilitation applications",
+  "unity": "2021.3",
+  "keywords": [
+    "vr",
+    "rehabilitation",
+    "ai",
+    "adaptive",
+    "healthcare"
+  ],
+  "author": {
+    "name": "Your Name",
+    "email": "your.email@example.com",
+    "url": "https://github.com/arartawil/adaptive-rehab-ai"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arartawil/adaptive-rehab-ai.git",
+    "directory": "unity-sdk"
+  },
+  "dependencies": {
+    "com.unity.xr.interaction.toolkit": "2.3.0"
+  },
+  "samples": [
+    {
+      "displayName": "Memory Card Game",
+      "description": "Adaptive memory matching game with AI-controlled difficulty",
+      "path": "Samples~/MemoryGame"
+    },
+    {
+      "displayName": "Reaching Task",
+      "description": "VR reaching exercise with adaptive target placement",
+      "path": "Samples~/ReachingTask"
+    }
+  ]
+}

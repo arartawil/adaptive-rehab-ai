@@ -1,0 +1,19 @@
+{
+    "name": "AdaptRehab",
+    "rootNamespace": "AdaptRehab",
+    "references": [
+        "Unity.XR.Interaction.Toolkit"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [
+        "Grpc.Core.Api.dll",
+        "Google.Protobuf.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

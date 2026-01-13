@@ -1,0 +1,121 @@
+syntax = "proto3";
+
+package adaptrehab;
+
+// Main adaptation service
+service AdaptationService {
+    // Initialize a new session
+    rpc Initialize(InitRequest) returns (InitResponse);
+    
+    // Get adaptation decision based on current state
+    rpc GetAdaptation(SensorData) returns (AdaptationDecision);
+    
+    // Send feedback/reward signal for learning modules
+    rpc UpdateFeedback(RewardSignal) returns (AckResponse);
+    
+    // Hot-swap the active adaptation module
+    rpc SwapModule(ModuleConfig) returns (AckResponse);
+    
+    // Get current service status
+    rpc GetStatus(Empty) returns (StatusResponse);
+    
+    // End session and cleanup
+    rpc EndSession(SessionRequest) returns (AckResponse);
+}
+
+// Initialization
+message InitRequest {
+    string session_id = 1;
+    PatientProfile patient_profile = 2;
+    TaskConfig task_config = 3;
+    string module_type = 4;  // "rule_based", "fuzzy", "rl_ppo"
+}
+
+message InitResponse {
+    bool success = 1;
+    string message = 2;
+    string module_name = 3;
+    string module_version = 4;
+}
+
+// Patient information
+message PatientProfile {
+    string patient_id = 1;
+    string condition = 2;  // "stroke", "tbi", "parkinson", etc.
+    float baseline_performance = 3;
+    map<string, string> metadata = 4;
+}
+
+// Task configuration
+message TaskConfig {
+    string task_type = 1;  // "memory", "reaching", "balance"
+    map<string, float> initial_difficulty = 2;
+    SafetyBounds safety_bounds = 3;
+}
+
+// Safety constraints
+message SafetyBounds {
+    float difficulty_min = 1;
+    float difficulty_max = 2;
+    float max_change_rate = 3;  // Max change per adaptation
+    map<string, FloatRange> parameter_bounds = 4;
+}
+
+message FloatRange {
+    float min = 1;
+    float max = 2;
+}
+
+// Sensor data from Unity
+message SensorData {
+    string session_id = 1;
+    int64 timestamp = 2;
+    map<string, float> performance_metrics = 3;  // accuracy, speed, etc.
+    map<string, float> raw_sensors = 4;          // position, velocity, etc.
+    map<string, string> task_state = 5;          // current difficulty level, round number
+}
+
+// Adaptation decision from AI module
+message AdaptationDecision {
+    string action = 1;  // "increase", "decrease", "maintain"
+    float magnitude = 2;
+    map<string, float> parameters = 3;  // Specific parameters to change
+    float confidence = 4;
+    string explanation = 5;
+    int64 timestamp = 6;
+}
+
+// Reward/feedback signal
+message RewardSignal {
+    string session_id = 1;
+    float reward = 2;  // -1.0 to 1.0
+    map<string, float> outcome_metrics = 3;
+}
+
+// Module swapping
+message ModuleConfig {
+    string session_id = 1;
+    string module_type = 2;  // New module to load
+    map<string, string> config = 3;
+}
+
+// Status information
+message StatusResponse {
+    bool is_running = 1;
+    string active_module = 2;
+    int32 active_sessions = 3;
+    float average_latency_ms = 4;
+    map<string, string> system_info = 5;
+}
+
+// Generic messages
+message Empty {}
+
+message AckResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message SessionRequest {
+    string session_id = 1;
+}
