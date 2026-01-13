@@ -118,8 +118,10 @@ class RuleBasedModule(AdaptationModule):
             )
             confidence = 0.9  # High confidence in maintaining
         
-        # Get current difficulty from state
+        # Get current difficulty from state (convert from string if needed)
         current_difficulty = state.task_state.get('difficulty', 0.5)
+        if isinstance(current_difficulty, str):
+            current_difficulty = float(current_difficulty)
         
         # Calculate new difficulty
         if action == AdaptationAction.INCREASE:

@@ -170,8 +170,10 @@ class SafetyWrapper:
     ) -> bool:
         """Check if action is feasible given current state."""
         
-        # Get current difficulty if available
+        # Get current difficulty if available (convert from string if needed)
         current_difficulty = current_state.task_state.get('difficulty', 0.5)
+        if isinstance(current_difficulty, str):
+            current_difficulty = float(current_difficulty)
         
         # Can't increase if already at max
         if decision.action == AdaptationAction.INCREASE:
