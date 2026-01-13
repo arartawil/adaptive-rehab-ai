@@ -1,0 +1,46 @@
+# Example configuration file for Adaptive Rehab AI
+
+service:
+  port: 50051
+  max_workers: 10
+  log_level: INFO
+
+adaptation:
+  module: rule_based  # Options: rule_based, fuzzy, rl_ppo
+  update_interval: 0.5  # seconds
+
+safety:
+  enabled: true
+  max_change_rate: 0.2  # Maximum 20% change per adaptation
+  min_confidence: 0.3   # Minimum confidence threshold
+  bounds:
+    difficulty:
+      min: 0.0
+      max: 1.0
+    time_limit:
+      min: 10
+      max: 300
+
+patient_profile:
+  id: patient_001
+  condition: stroke
+  baseline_performance: 0.5
+
+module_configs:
+  rule_based:
+    success_threshold: 0.8
+    failure_threshold: 0.4
+    increase_step: 0.1
+    decrease_step: 0.15
+
+  fuzzy:
+    membership_functions:
+      performance: [poor, fair, good]
+      difficulty: [easy, medium, hard]
+
+  rl_ppo:
+    learning_rate: 0.0003
+    gamma: 0.99
+    n_steps: 2048
+    batch_size: 64
+    model_path: models/ppo_checkpoint.zip

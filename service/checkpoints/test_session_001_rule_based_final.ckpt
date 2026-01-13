@@ -1,0 +1,11 @@
+{
+  "module_id": "test_session_001_rule_based",
+  "module_type": "rule_based",
+  "performance_history": [],
+  "config": {
+    "success_threshold": 0.7,
+    "failure_threshold": 0.3,
+    "increase_step": 0.1,
+    "decrease_step": 0.15
+  }
+}

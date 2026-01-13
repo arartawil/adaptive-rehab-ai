@@ -10,10 +10,12 @@ from adaptrehab.modules.base_module import (
     StateVector,
     AdaptationDecision
 )
+from adaptrehab.modules.rule_based import RuleBasedModule
 
 __all__ = [
     "AdaptationModule",
     "AdaptationAction",
     "StateVector",
-    "AdaptationDecision"
+    "AdaptationDecision",
+    "RuleBasedModule"
 ]
