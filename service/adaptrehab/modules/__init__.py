@@ -11,11 +11,13 @@ from adaptrehab.modules.base_module import (
     AdaptationDecision
 )
 from adaptrehab.modules.rule_based import RuleBasedModule
+from adaptrehab.modules.fuzzy_logic import FuzzyLogicModule
 
 __all__ = [
     "AdaptationModule",
     "AdaptationAction",
     "StateVector",
     "AdaptationDecision",
-    "RuleBasedModule"
+    "RuleBasedModule",
+    "FuzzyLogicModule"
 ]

@@ -1,0 +1,17 @@
+{
+  "module_id": "test_Struggling_Patient_-_Memory_Task_rule_based",
+  "module_type": "rule_based",
+  "performance_history": [
+    0.42000000000000004,
+    0.42750000000000005,
+    0.43500000000000005,
+    0.44250000000000006,
+    0.45000000000000007
+  ],
+  "config": {
+    "success_threshold": 0.6000000000000001,
+    "failure_threshold": 0.3,
+    "increase_step": 0.1,
+    "decrease_step": 0.15
+  }
+}

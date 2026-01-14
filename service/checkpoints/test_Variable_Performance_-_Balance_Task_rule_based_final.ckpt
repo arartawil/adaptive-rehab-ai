@@ -1,0 +1,17 @@
+{
+  "module_id": "test_Variable_Performance_-_Balance_Task_rule_based",
+  "module_type": "rule_based",
+  "performance_history": [
+    0.5088426243556669,
+    0.5599463796853109,
+    0.49828459424997484,
+    0.6248533110300608,
+    0.6912689271392671
+  ],
+  "config": {
+    "success_threshold": 0.6000000000000001,
+    "failure_threshold": 0.3,
+    "increase_step": 0.1,
+    "decrease_step": 0.15
+  }
+}

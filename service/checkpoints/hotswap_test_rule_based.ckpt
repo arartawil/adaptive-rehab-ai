@@ -1,0 +1,17 @@
+{
+  "module_id": "hotswap_test_rule_based",
+  "module_type": "rule_based",
+  "performance_history": [
+    0.6,
+    0.6,
+    0.6,
+    0.6,
+    0.6
+  ],
+  "config": {
+    "success_threshold": 0.7,
+    "failure_threshold": 0.3,
+    "increase_step": 0.1,
+    "decrease_step": 0.15
+  }
+}

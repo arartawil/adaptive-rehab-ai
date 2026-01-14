@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptive Memory Game - Rehab AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .game-board {
+            display: grid;
+            gap: 10px;
+            margin: 20px 0;
+            justify-content: center;
+        }
+        
+        .card {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .card:hover:not(.matched):not(.flipped) {
+            transform: scale(1.05);
+        }
+        
+        .card.flipped {
+            background: white;
+            border: 3px solid #667eea;
+        }
+        
+        .card.matched {
+            background: #4caf50;
+            cursor: default;
+            transform: scale(0.95);
+        }
+        
+        .card .back {
+            display: block;
+        }
+        
+        .card .front {
+            display: none;
+        }
+        
+        .card.flipped .back {
+            display: none;
+        }
+        
+        .card.flipped .front {
+            display: block;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 30px;
+            font-size: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+        
+        .ai-status {
+            background: #e8eaf6;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .ai-status h3 {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .ai-message {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .connection-status {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .connection-status.connected {
+            background: #4caf50;
+        }
+        
+        .connection-status.disconnected {
+            background: #f44336;
+        }
+        
+        .difficulty-indicator {
+            background: linear-gradient(90deg, #4caf50 0%, #ff9800 50%, #f44336 100%);
+            height: 10px;
+            border-radius: 5px;
+            margin-top: 5px;
+            position: relative;
+        }
+        
+        .difficulty-marker {
+            position: absolute;
+            width: 3px;
+            height: 20px;
+            background: white;
+            border: 2px solid #333;
+            top: -5px;
+            left: 0%;
+            transition: left 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 Adaptive Memory Game</h1>
+        <p class="subtitle">
+            <span class="connection-status disconnected" id="connectionStatus"></span>
+            AI-Powered Rehabilitation Training
+        </p>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Round</div>
+                <div class="stat-value" id="roundNum">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Matches</div>
+                <div class="stat-value" id="matches">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Accuracy</div>
+                <div class="stat-value" id="accuracy">0%</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Grid Size</div>
+                <div class="stat-value" id="gridSize">4×4</div>
+            </div>
+        </div>
+        
+        <div class="stat-box">
+            <div class="stat-label">Difficulty Level</div>
+            <div class="difficulty-indicator">
+                <div class="difficulty-marker" id="difficultyMarker" style="left: 50%;"></div>
+            </div>
+        </div>
+        
+        <div class="game-board" id="gameBoard"></div>
+        
+        <div class="controls">
+            <button class="btn-primary" id="startBtn">Start Game</button>
+            <button class="btn-secondary" id="newRoundBtn" disabled>New Round</button>
+        </div>
+        
+        <div class="ai-status">
+            <h3>🤖 AI Adaptation Engine</h3>
+            <div class="ai-message" id="aiMessage">
+                Click "Start Game" to connect to the AI adaptation engine...
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = 'http://localhost:8000';
+        
+        class MemoryGame {
+            constructor() {
+                this.sessionId = `web_${Date.now()}`;
+                this.difficulty = 0.0;
+                this.roundNum = 0;
+                this.matches = 0;
+                this.attempts = 0;
+                this.flippedCards = [];
+                this.isProcessing = false;
+                this.cards = [];
+                this.connected = false;
+                this.startTime = null;
+                
+                this.initElements();
+                this.attachEvents();
+            }
+            
+            initElements() {
+                this.gameBoard = document.getElementById('gameBoard');
+                this.startBtn = document.getElementById('startBtn');
+                this.newRoundBtn = document.getElementById('newRoundBtn');
+                this.roundNumEl = document.getElementById('roundNum');
+                this.matchesEl = document.getElementById('matches');
+                this.accuracyEl = document.getElementById('accuracy');
+                this.gridSizeEl = document.getElementById('gridSize');
+                this.aiMessageEl = document.getElementById('aiMessage');
+                this.connectionStatusEl = document.getElementById('connectionStatus');
+                this.difficultyMarkerEl = document.getElementById('difficultyMarker');
+            }
+            
+            attachEvents() {
+                this.startBtn.addEventListener('click', () => this.startGame());
+                this.newRoundBtn.addEventListener('click', () => this.startNewRound());
+            }
+            
+            async startGame() {
+                this.updateAIMessage('🔌 Connecting to AI adaptation engine...');
+                
+                try {
+                    // Initialize session
+                    const response = await fetch(`${API_URL}/session/init`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            session_id: this.sessionId,
+                            module_name: 'rule_based',
+                            patient_profile: {
+                                patient_id: 'web_user',
+                                condition: 'cognitive',
+                                baseline_performance: 0.5
+                            },
+                            task_config: {
+                                task_type: 'memory',
+                                safety_bounds: {
+                                    difficulty: { min: 0.3, max: 0.9 }
+                                }
+                            }
+                        })
+                    });
+                    
+                    if (!response.ok) throw new Error('Failed to connect');
+                    
+                    this.connected = true;
+                    this.connectionStatusEl.className = 'connection-status connected';
+                    this.updateAIMessage('✅ Connected! Starting your first round...');
+                    
+                    console.log('🧠 AI Adaptation Engine Connected!');
+                    console.log(`Session ID: ${this.sessionId}`);
+                    console.log(`Starting Difficulty: ${this.difficulty.toFixed(3)}`);
+                    
+                    this.startBtn.disabled = true;
+                    this.newRoundBtn.disabled = false;
+                    
+                    await this.startNewRound();
+                    
+                } catch (error) {
+                    this.updateAIMessage(`❌ Connection failed: ${error.message}. Make sure server is running!`);
+                    console.error(error);
+                }
+            }
+            
+            async startNewRound() {
+                this.roundNum++;
+                this.matches = 0;
+                this.attempts = 0;
+                this.flippedCards = [];
+                this.startTime = Date.now();
+                
+                console.log(`\n▶️  Starting Round ${this.roundNum} (Difficulty: ${this.difficulty.toFixed(3)})`);
+                
+                this.roundNumEl.textContent = this.roundNum;
+                this.matchesEl.textContent = '0';
+                this.accuracyEl.textContent = '0%';
+                
+                this.createBoard();
+                this.newRoundBtn.disabled = true;
+                
+                this.updateAIMessage(`Round ${this.roundNum} started! Difficulty: ${(this.difficulty * 100).toFixed(0)}%`);
+            }
+            
+            createBoard() {
+                // Calculate grid size based on difficulty
+                let gridSize;
+                if (this.difficulty < 0.3) {
+                    gridSize = 3; // 3x3 = 9 cards (4 pairs + 1 extra)
+                } else if (this.difficulty < 0.5) {
+                    gridSize = 4; // 4x4 = 16 cards (8 pairs)
+                } else if (this.difficulty < 0.7) {
+                    gridSize = 6; // 6x6 = 36 cards (18 pairs)
+                } else {
+                    gridSize = 8; // 8x8 = 64 cards (32 pairs)
+                }
+                
+                this.gridSizeEl.textContent = `${gridSize}×${gridSize}`;
+                
+                // Create card paMath.floor(totalCards / 2);
+                const emojis = ['🎨', '🎭', '🎪', '🎬', '🎮', '🎯', '🎲', '🎰', '🎳', '🎸', '🎹', '🎺', '🎻', '🎼', '🎵', '🎶', 
+                               '🏀', '⚽', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸', '🏒', '🏑', '🥊', '🥋', '⛳', '🏹'];
+                
+                const selectedEmojis = emojis.slice(0, numPairs);
+                this.cards = [...selectedEmojis, ...selectedEmojis];
+                
+                // Add one extra card if odd number of cards (for 3x3)
+                if (totalCards % 2 !== 0) {
+                    this.cards.push(emojis[numPairs]);
+                }
+                
+                this.cards = this.cardst selectedEmojis = emojis.slice(0, numPairs);
+                this.cards = [...selectedEmojis, ...selectedEmojis]
+                    .sort(() => Math.random() - 0.5);
+                
+                // Render board
+                this.gameBoard.innerHTML = '';
+                this.gameBoard.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+                
+                this.cards.forEach((emoji, index) => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.dataset.index = index;
+                    card.dataset.emoji = emoji;
+                    card.innerHTML = `
+                        <span class="back">?</span>
+                        <span class="front">${emoji}</span>
+                    `;
+                    card.addEventListener('click', () => this.flipCard(card));
+                    this.gameBoard.appendChild(card);
+                });
+            }
+            
+            flipCard(card) {
+                if (this.isProcessing || card.classList.contains('flipped') || card.classList.contains('matched')) {
+                    return;
+                }
+                
+                card.classList.add('flipped');
+                this.flippedCards.push(card);
+                
+                if (this.flippedCards.length === 2) {
+                    this.attempts++;
+                    this.isProcessing = true;
+                    
+                    const [card1, card2] = this.flippedCards;
+                    
+                    if (card1.dataset.emoji === card2.dataset.emoji) {
+                        // Match!
+                        setTimeout(() => {
+                            card1.classList.add('matched');
+                            card2.classList.add('matched');
+                            this.matches++;
+                            this.matchesEl.textContent = this.matches;
+                            this.updateAccuracy();
+                            this.flippedCards = [];
+                            this.isProcessing = false;
+                            
+                            // Check if round complete
+                            if (this.matches === this.cards.length / 2) {
+                                this.completeRound();
+                            }
+                        }, 500);
+                    } else {
+                        // No match
+                        setTimeout(() => {
+                            card1.classList.remove('flipped');
+                            card2.classList.remove('flipped');
+                            this.updateAccuracy();
+                            this.flippedCards = [];
+                            this.isProcessing = false;
+                        }, 1000);
+                    }
+                }
+            }
+            
+            updateAccuracy() {
+                const accuracy = this.attempts > 0 ? (this.matches / this.attempts * 100) : 0;
+                this.accuracyEl.textContent = `${accuracy.toFixed(0)}%`;
+            }
+            
+            async completeRound() {
+                const duration = (Date.now() - this.startTime) / 1000;
+                const accuracy = this.attempts > 0 ? (this.matches / this.attempts) : 0;
+                
+                // Send performance to AI
+                this.updateAIMessage('🤖 Analyzing your performance...');
+                
+                try {
+                    const response = await fetch(`${API_URL}/adapt`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            session_id: this.sessionId,
+                            performance_metrics: {
+                                accuracy: accuracy,
+                                success_rate: accuracy,
+                                reaction_time: duration / this.matches,
+                                error_rate: 1 - accuracy,
+                                consistency: Math.min(accuracy * 1.2, 1.0)
+                            },
+                            sensor_data: {},
+                            task_state: {
+                                difficulty: this.difficulty,
+                                round: this.roundNum,
+                                duration: duration
+                            }
+                        })
+                    });
+                    
+                    const decision = await response.json();
+                    
+                    // Update difficulty
+                    const oldDifficulty = this.difficulty;
+                    const newDifficulty = decision.parameters.difficulty;
+                    this.difficulty = newDifficulty;
+                    
+                    // Log difficulty change to console
+                    console.log('='.repeat(60));
+                    console.log(`Round ${this.roundNum} Complete:`);
+                    console.log(`  Accuracy: ${(accuracy * 100).toFixed(1)}%`);
+                    console.log(`  AI Action: ${decision.action.toUpperCase()}`);
+                    console.log(`  Difficulty: ${oldDifficulty.toFixed(3)} → ${newDifficulty.toFixed(3)}`);
+                    console.log(`  Change: ${((newDifficulty - oldDifficulty) * 100).toFixed(1)}%`);
+                    console.log(`  Confidence: ${(decision.confidence * 100).toFixed(1)}%`);
+                    console.log(`  Explanation: ${decision.explanation}`);
+                    console.log('='.repeat(60));
+                    
+                    // Update UI
+                    const markerPosition = (newDifficulty * 100);
+                    this.difficultyMarkerEl.style.left = `${markerPosition}%`;
+                    
+                    // Send feedback
+                    const reward = (accuracy - 0.5) * 2; // -1 to 1 scale
+                    await fetch(`${API_URL}/feedback`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            session_id: this.sessionId,
+                            reward: reward
+                        })
+                    });
+                    
+                    // Display AI message
+                    let actionEmoji = decision.action === 'increase' ? '📈' : 
+                                    decision.action === 'decrease' ? '📉' : '➡️';
+                    
+                    this.updateAIMessage(
+                        `${actionEmoji} Round complete! ${decision.explanation} ` +
+                        `(Confidence: ${(decision.confidence * 100).toFixed(0)}%)`
+                    );
+                    
+                    this.newRoundBtn.disabled = false;
+                    
+                } catch (error) {
+                    this.updateAIMessage(`❌ AI error: ${error.message}`);
+                    console.error(error);
+                }
+            }
+            
+            updateAIMessage(message) {
+                this.aiMessageEl.textContent = message;
+            }
+        }
+        
+        // Initialize game when page loads
+        const game = new MemoryGame();
+    </script>
+</body>
+</html>
