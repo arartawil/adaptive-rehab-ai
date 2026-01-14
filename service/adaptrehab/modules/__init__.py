@@ -12,6 +12,7 @@ from adaptrehab.modules.base_module import (
 )
 from adaptrehab.modules.rule_based import RuleBasedModule
 from adaptrehab.modules.fuzzy_logic import FuzzyLogicModule
+from adaptrehab.modules.reinforcement_learning import ReinforcementLearningModule
 
 __all__ = [
     "AdaptationModule",
@@ -19,5 +20,6 @@ __all__ = [
     "StateVector",
     "AdaptationDecision",
     "RuleBasedModule",
-    "FuzzyLogicModule"
+    "FuzzyLogicModule",
+    "ReinforcementLearningModule"
 ]
