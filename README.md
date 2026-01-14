@@ -39,7 +39,7 @@
 ### ✨ Key Features
 
 - ⚡ **Blazing Fast** - <1ms adaptation latency, 17K+ adaptations/sec
-- 🔌 **Multi-Platform** - Python, Unity (C#), Web (REST API), any gRPC client
+- 🔌 **Multi-Platform** - Python ✅, Unity C# ✅, Web (REST API) ✅, any gRPC client
 - 🤖 **Three AI Modules** - Rule-based, Fuzzy Logic, Reinforcement Learning (all implemented ✅)
 - 🛡️ **Safe** - Built-in safety bounds and confidence thresholds
 - 📊 **Observable** - Event-driven architecture with full telemetry
@@ -409,7 +409,7 @@ for (let round = 0; round < 10; round++) {
 }
 ```
 
-### Example 3: Unity VR (Coming Soon)
+### Example 3: Unity VR ✅
 
 ```csharp
 using AdaptRehab;
@@ -417,55 +417,54 @@ using UnityEngine;
 
 public class VRRehabGame : MonoBehaviour
 {
-    private AdaptRehabClient client;
+    private AdaptiveRehabManager rehabManager;
     private float difficulty = 0.5f;
     
     async void Start()
     {
-        // Connect to gRPC server
-        client = new AdaptRehabClient("localhost:50051");
+        // Get or create manager
+        rehabManager = FindObjectOfType<AdaptiveRehabManager>();
+        if (rehabManager == null)
+        {
+            var managerObj = new GameObject("AdaptiveRehabManager");
+            rehabManager = managerObj.AddComponent<AdaptiveRehabManager>();
+            rehabManager.aiModule = AdaptiveRehabManager.AIModule.ReinforcementLearning;
+        }
         
-        await client.InitSession(
-            sessionId: "vr_patient_001",
-            moduleName: "reinforcement_learning",
-            patientProfile: new Dictionary<string, object> {
-                {"baseline_performance", 0.5}
-            },
-            taskConfig: new Dictionary<string, object> {
-                {"task_type", "vr_reaching"}
-            }
-        );
+        // Subscribe to events
+        rehabManager.OnAdaptationReceived += OnAdaptation;
+        
+        // Wait for initialization
+        await rehabManager.InitializeAsync();
     }
     
-    async void Update()
+    async void OnRoundComplete()
     {
-        if (roundComplete)
-        {
-            // Create state from VR metrics
-            var state = new StateVector {
-                PerformanceMetrics = new Dictionary<string, float> {
-                    {"accuracy", CalculateAccuracy()},
-                    {"speed", CalculateSpeed()}
-                },
-                SensorData = new Dictionary<string, float> {
-                    {"hand_velocity", GetHandVelocity()},
-                    {"reach_distance", GetReachDistance()}
-                },
-                TaskState = new Dictionary<string, object> {
-                    {"difficulty", difficulty},
-                    {"round", currentRound}
-                }
-            };
-            
-            // Get AI decision
-            var decision = await client.GetAdaptation(state);
-            
-            // Apply to VR environment
-            difficulty += decision.Parameters["difficulty_change"];
-            UpdateVRDifficulty(difficulty);
-            
-            Debug.Log($"AI Decision: {decision.Action}, Confidence: {decision.Confidence}");
-        }
+        // Calculate performance metrics
+        float accuracy = CalculateAccuracy();
+        float speed = CalculateSpeed();
+        
+        // Request adaptation with additional VR metrics
+        var additionalMetrics = new Dictionary<string, float> {
+            {"hand_velocity", GetHandVelocity()},
+            {"reach_distance", GetReachDistance()}
+        };
+        
+        var decision = await rehabManager.RequestAdaptationAsync(
+            accuracy, 
+            speed, 
+            additionalMetrics
+        );
+        
+        // Update difficulty from manager
+        difficulty = rehabManager.CurrentDifficulty;
+        UpdateVRDifficulty(difficulty);
+    }
+    
+    void OnAdaptation(AdaptationDecision decision)
+    {
+        Debug.Log($"AI Decision: {decision.Action}, Confidence: {decision.Confidence}");
+        Debug.Log($"Reason: {decision.Explanation}");
     }
 }
 ```
@@ -565,6 +564,27 @@ python service/run_rest_server.py
 cd web-demo
 # Open memory-game.html in your browser
 ```
+
+### 7. Unity VR Demo (Unity SDK)
+
+**What it does**: VR rehabilitation game with hand tracking and adaptive difficulty
+
+**Features**:
+- Reach and grab targets with VR controllers
+- Real-time difficulty adaptation based on accuracy and speed
+- Two examples: Simple target game + Full VR rehabilitation
+- Supports all 3 AI modules
+
+**Setup**:
+```bash
+# 1. Start Python server
+python service/run_rest_server.py
+
+# 2. Open Unity project and import SDK
+# See unity-sdk/README.md for detailed setup
+```
+
+**Learn more**: [Unity SDK Documentation](unity-sdk/README.md)
 
 ---
 
